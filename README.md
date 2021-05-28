@@ -8,6 +8,36 @@ So we can just feed the input from Bluetooth to the I2S output: An example for t
 
 Unfortunately this example did not make me happy so I decided to convert it into a simple __Arduino Library__ that is very easy to use from an Arduino Software IDE.
 
+## Change History
+
+V.1.0.0:
+
+- add MCLK PIN configuration 
+- provide get_connection_status() method
+- provide end() method to shut down bluetooth
+- Metadata support with the help of a callback function - Thanks to [JohnyMielony](https://github.com/JohnyMielony)
+- AVRC command support thanks to [PeterPark](https://github.com/KIdon-Park) 
+- Improved init_bluetooth checks, in case bluedroid was already initialized elsewhere - Thanks to [Antonis Katzourakis](https://github.com/ant0nisk)
+- No auto reconnect after clean disconnect - Thanks to [Bajczi Levente](https://github.com/leventeBajczi)
+- The data is rescaled to when written to the internal DAC - Thanks to [Martin Hron](https://github.com/thinkcz)
+- Corrected wrong case of include to Arduino.h - Thanks to [RyanDavis](https://github.com/RyanDavis)
+- Added callback to received packets - Thanks to [Mishaux](https://github.com/Mishaux)
+- Automatically reconnect to last source - Thanks to [JohnyMielony](https://github.com/JohnyMielony)
+- Support for data callback - Thanks to [Mike Mishaux](https://github.com/Mishaux)
+- Improved init_bluetooth checks, in case bluedroid was already initialized elsewhere [Antonis Katzourakis](https://github.com/ant0nisk)
+- No auto reconnect after clean disconnect thanks to [Bajczi Levente](https://github.com/leventeBajczi)
+- Made all methods virtual to enable flexible subclassing
+- Error Corrections in BluetoothA2DPSource
+- Support for writeData in BluetoothA2DPSource
+- Support for multiple alternative BT names in BluetoothA2DPSource
+- Redesign to protect internal callbacks in BluetoothA2DPSink
+- Generate Documentation with the help of doxygen 
+- New functionality: BluetoothA2DPSource
+- Renamed project from 'esp32_bt_music_receiver' to 'ESP32-A2DP'
+- Corrected Spelling Mistake from Blootooth to Bluetooth in Class names: The correct class name is BluetoothA2DPSink!
+- The include h files are now called like the class names (e.g. BluetoothA2DPSink.h and BluetoothA2DPSource.h)
+
+
 ## A2DP Sink
 
 ### A Simple I2S Example (A2DS Sink)
@@ -216,34 +246,6 @@ cd  ~/Documents/Arduino/libraries
 git clone pschatzmann/ESP32-A2DP.git
 ```
 
-## Change History
-
-V.1.0.0:
-
-- add MCLK PIN configuration 
-- provide get_connection_status() method
-- provide end() method to shut down bluetooth
-- Metadata support with the help of a callback function - Thanks to [JohnyMielony](https://github.com/JohnyMielony)
-- AVRC command support thanks to [PeterPark](https://github.com/KIdon-Park) 
-- Improved init_bluetooth checks, in case bluedroid was already initialized elsewhere - Thanks to [Antonis Katzourakis](https://github.com/ant0nisk)
-- No auto reconnect after clean disconnect - Thanks to [Bajczi Levente](https://github.com/leventeBajczi)
-- The data is rescaled to when written to the internal DAC - Thanks to [Martin Hron](https://github.com/thinkcz)
-- Corrected wrong case of include to Arduino.h - Thanks to [RyanDavis](https://github.com/RyanDavis)
-- Added callback to received packets - Thanks to [Mishaux](https://github.com/Mishaux)
-- Automatically reconnect to last source - Thanks to [JohnyMielony](https://github.com/JohnyMielony)
-- Support for data callback - Thanks to [Mike Mishaux](https://github.com/Mishaux)
-- Improved init_bluetooth checks, in case bluedroid was already initialized elsewhere [Antonis Katzourakis](https://github.com/ant0nisk)
-- No auto reconnect after clean disconnect thanks to [Bajczi Levente](https://github.com/leventeBajczi)
-- Made all methods virtual to enable flexible subclassing
-- Error Corrections in BluetoothA2DPSource
-- Support for writeData in BluetoothA2DPSource
-- Support for multiple alternative BT names in BluetoothA2DPSource
-- Redesign to protect internal callbacks in BluetoothA2DPSink
-- Generate Documentation with the help of doxygen 
-- New functionality: BluetoothA2DPSource
-- Renamed project from 'esp32_bt_music_receiver' to 'ESP32-A2DP'
-- Corrected Spelling Mistake from Blootooth to Bluetooth in Class names: The correct class name is BluetoothA2DPSink!
-- The include h files are now called like the class names (e.g. BluetoothA2DPSink.h and BluetoothA2DPSource.h)
 
 
 
