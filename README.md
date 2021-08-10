@@ -1,6 +1,15 @@
 
 # Change History
 
+V1.0.1
+- Remove BluetoothA2DPSource
+
+- add i2s mclk (i2s_mclk_pin_select(const uint8_t pin);)
+- add callback set_on_connected2BT
+- add callback set_on_disconnected2BT
+- add PIN CODE ESP_BT_IO_CAP_IN; 
+
+
 
 V1.0.0
 
@@ -45,4 +54,3 @@ V1.0.0
 
 
 # Thanks [pschatzmann](https://github.com/pschatzmann)
-
