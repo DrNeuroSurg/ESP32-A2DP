@@ -37,6 +37,8 @@ extern "C" {
 #include "driver/i2s.h"
 #include "esp_avrc_api.h"
 #include "BluetoothA2DPCommon.h"
+#include <esp_gap_ble_api.h>
+#include "esp_spp_api.h"
 
 #ifdef ARDUINO_ARCH_ESP32
 #include "esp32-hal-log.h"
@@ -99,16 +101,22 @@ class BluetoothA2DPSink {
     virtual void set_i2s_config(i2s_config_t i2s_config);
 
     /// starts the I2S bluetooth sink with the inidicated name
-    virtual void start(char* name, bool auto_reconect=true);
+    virtual void start(const char* name, bool auto_reconect=true);
 
-    /// starts the I2S bluetooth sink with the inidicated name - if you release the memory a future start is not possible
+    /// ends the I2S bluetooth sink with the indicated name - if you release the memory a future start is not possible
     virtual void end(bool release_memory=false);
+    
+    /// Disconnects the current a2d connection, allowing for another device to connect
+    virtual void disconnect();
 
     /// Determine the actual audio state
     virtual esp_a2d_audio_state_t get_audio_state();
    
     /// Determine the connection state
     virtual esp_a2d_connection_state_t get_connection_state();
+
+    /// Returns true if the state is connected
+    virtual bool isConnected();
 
     /// Determine the actuall audio type
     virtual esp_a2d_mct_t get_audio_type();
@@ -119,10 +127,16 @@ class BluetoothA2DPSink {
     }
 
     /// Define callback which is called when we receive data: This callback provides access to the data
-    virtual void set_stream_reader(void (*callBack)(const uint8_t*, uint32_t));
+    virtual void set_stream_reader(void (*callBack)(const uint8_t*, uint32_t), bool i2s_output=true);
 
     /// Define callback which is called when we receive data
     virtual void set_on_data_received(void (*callBack)());
+	
+	/// Define callback which is called when we receive data
+    virtual void set_on_connected2BT(void (*callBack)());
+	
+	/// Define callback which is called when we receive data
+    virtual void set_on_disconnected2BT(void (*callBack)());
 
     /// Starts to play music using AVRC
     virtual void play();
@@ -134,9 +148,25 @@ class BluetoothA2DPSink {
     virtual void next();
     /// AVRC previouse
     virtual void previous();
+    /// mix stereo into single mono signal
+    virtual void set_mono_downmix(bool enabled) { mono_downmix = enabled; }
+    /// Defines the bits per sample for output (if > 16 output will be expanded)
+    virtual void set_bits_per_sample(int bps) { i2s_config.bits_per_sample = (i2s_bits_per_sample_t) bps; }
+    
+    /// Provides the actually set data rate (in samples per second)
+    uint16_t sample_rate();
+	
+	virtual void setPinCode(int passkey);
 	
 	esp_err_t i2s_mclk_pin_select(const uint8_t pin);
-
+#ifdef CURRENT_ESP_IDF
+    /// Bluetooth discoverability
+    virtual void set_discoverability(esp_bt_discovery_mode_t d);
+#endif
+	
+	
+	
+	
     /// Make sure that BluetoothA2DPCallbacks can call protected event handlers
     friend BluetoothA2DPSinkCallbacks;
 	
@@ -147,7 +177,7 @@ class BluetoothA2DPSink {
     xTaskHandle app_task_handle;
     i2s_config_t i2s_config;
     i2s_pin_config_t pin_config;    
-    char * bt_name;
+    const char * bt_name;
     uint32_t m_pkt_cnt = 0;
     esp_a2d_audio_state_t m_audio_state = ESP_A2D_AUDIO_STATE_STOPPED;
     const char *m_a2d_conn_state_str[4] = {"Disconnected", "Connecting", "Connected", "Disconnecting"};
@@ -155,11 +185,20 @@ class BluetoothA2DPSink {
     esp_a2d_audio_state_t audio_state;
     esp_a2d_connection_state_t connection_state;
     esp_a2d_mct_t audio_type;
-    void (*data_received)() = NULL;
-    void (*stream_reader)(const uint8_t*, uint32_t) = NULL;
-    void (*avrc_metadata_callback)(uint8_t, const uint8_t*) = NULL;
+	
+	void (*bt_disconnected)() = nullptr;
+	void (*bt_connected)() = nullptr;
+    void (*data_received)() = nullptr;
+    void (*stream_reader)(const uint8_t*, uint32_t) = nullptr;
+    void (*avrc_metadata_callback)(uint8_t, const uint8_t*) = nullptr;
     bool is_auto_reconnect;
-	  esp_bd_addr_t last_connection = {NULL};
+    esp_bd_addr_t last_connection = {0,0,0,0,0,0};
+    bool is_i2s_output = true;
+    bool player_init = false;
+    bool mono_downmix = false;
+#ifdef CURRENT_ESP_IDF
+    esp_bt_discovery_mode_t discoverability = ESP_BT_GENERAL_DISCOVERABLE;
+#endif
 
     // protected methods
     virtual int init_bluetooth();
@@ -170,7 +209,11 @@ class BluetoothA2DPSink {
     virtual void app_work_dispatched(app_msg_t *msg);
     virtual void app_alloc_meta_buffer(esp_avrc_ct_cb_param_t *param);
     virtual void av_new_track();
+#ifdef CURRENT_ESP_IDF
+    virtual void av_notify_evt_handler(uint8_t& event_id, esp_avrc_rn_param_t& event_parameter);
+#else
     virtual void av_notify_evt_handler(uint8_t event_id, uint32_t event_parameter);
+#endif    
     
     virtual void init_nvs();
     virtual void get_last_connection();
@@ -195,8 +238,12 @@ class BluetoothA2DPSink {
     // avrc event handler 
     virtual void av_hdl_avrc_evt(uint16_t event, void *p_param);
 
-	  void connect_to_last_device();
-
+	void connect_to_last_device();
+    // change the scan mode
+    void set_scan_mode_connectable(bool connectable);
+    // check if last connectioin is defined
+    bool has_last_connection();
+	
 };
 
 

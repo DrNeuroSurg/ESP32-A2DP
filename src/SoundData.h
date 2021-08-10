@@ -16,8 +16,12 @@
 #ifndef __SOUND_DATA_H__
 #define __SOUND_DATA_H__
 
-#include "Arduino.h"
+//#include "Arduino.h"
+#include <stdint.h>
 
+#ifndef min
+#define min(a,b) (((a)<(b))?(a):(b))
+#endif
 
 /**
  *  @brief Utility structure that can be used to split a int32_t up into 2 separate channels with int16_t data.
@@ -25,6 +29,15 @@
 struct __attribute__((packed)) Channels {
   int16_t channel1;
   int16_t channel2;
+
+  Channels(int v){
+    channel1 = channel2 = v;
+  }
+  
+  Channels(){
+    channel1 = channel2 = 0;
+  }
+
 };
 
 /**
