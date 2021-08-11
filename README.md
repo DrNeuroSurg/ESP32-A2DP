@@ -1,9 +1,16 @@
 
 # Change History
 
-V1.0.1
-- Remove BluetoothA2DPSource
+V1.0.2
+- add volume control 
+- add set volume control (setVolume(uint8_t volume);)
+- add get volume control (getVolume())
 
+
+V1.0.1
+#
+- Remove BluetoothA2DPSource
+#
 - add i2s mclk (i2s_mclk_pin_select(const uint8_t pin);)
 - add callback set_on_connected2BT
 - add callback set_on_disconnected2BT

@@ -18,41 +18,45 @@
 
 #include "BluetoothA2DPSink.h"
 
+
+uint8_t volume = 0;
+long previousMillis = 0;        // will store last time LED was updated
+long interval = 10000;           // interval at which to blink (milliseconds)
+
 BluetoothA2DPSink a2dp_sink;
-
-char buff [6];
-volatile byte indx;
-
-
 
 void setup() {
 
   Serial.begin(115200);
 
-
   a2dp_sink.start("MyMusic", false);
-
-
 
 }
 
 
 void loop() {
+  unsigned long currentMillis = millis();
 
+  if (currentMillis - previousMillis > interval) {
+    // save the last time you blinked the LED
+    previousMillis = currentMillis;
 
+    Serial.println("Volume Change");   // send a capital A
+    
 
-
-  if (Serial.available() > 0) {
-    byte c = Serial.read();
-    if (indx < sizeof buff) {
-      buff [indx++] = c; // save data in the next index in the array buff
-      if (indx == 6) { //check for the end of the word
-        Serial.print(buff);
-        a2dp_sink.setPinCode(atoi(buff));
-        indx = -1; //reset button to zero
-
-      }
+    a2dp_sink.setVolume(volume++);
+	
+	
+	if (a2dp_sink.isConnected() == true) {
+    
+        printf("Volume is %d\n", a2dp_sink.getVolume());
     }
+	
   }
+
+
+
+
+
 
 }
