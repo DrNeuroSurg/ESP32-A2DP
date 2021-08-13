@@ -2,6 +2,8 @@
 # Change History
 V1.0.4
 - add callback bt_volumechange;
+- fix I2S_COMM_FORMAT_I2S_MSB   __attribute__((deprecated)) = 0x01, /*!< I2S format MSB, (I2S_COMM_FORMAT_I2S |I2S_COMM_FORMAT_I2S_MSB) correspond to `I2S_COMM_FORMAT_STAND_I2S`*/
+ 
 
 V1.0.3
 - fix volume control 
