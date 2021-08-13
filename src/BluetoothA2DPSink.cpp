@@ -239,18 +239,18 @@ void BluetoothA2DPSink::start(const char* name, bool auto_reconnect)
 	
 	/* Set default parameters for Secure Simple Pairing */
 	
-    //esp_bt_sp_param_t param_type = ESP_BT_SP_IOCAP_MODE;
-    //esp_bt_io_cap_t iocap = ESP_BT_IO_CAP_IN;
-    //esp_bt_gap_set_security_param(param_type, &iocap, sizeof(uint8_t));
+    esp_bt_sp_param_t param_type = ESP_BT_SP_IOCAP_MODE;
+    esp_bt_io_cap_t iocap = ESP_BT_IO_CAP_IN;
+    esp_bt_gap_set_security_param(param_type, &iocap, sizeof(uint8_t));
     
 	
 	/*
      * Set default parameters for Legacy Pairing
      * Use fixed pin code
      */
-    //esp_bt_pin_type_t pin_type = ESP_BT_PIN_TYPE_VARIABLE;
-    //esp_bt_pin_code_t pin_code;
-    //esp_bt_gap_set_pin(pin_type, 0, pin_code);
+    esp_bt_pin_type_t pin_type = ESP_BT_PIN_TYPE_VARIABLE;
+    esp_bt_pin_code_t pin_code;
+    esp_bt_gap_set_pin(pin_type, 0, pin_code);
 	
 }
 
@@ -311,7 +311,7 @@ void bt_app_gap_cb(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *param)
 			ESP_LOGI(BT_AV_TAG, "ESP_BT_GAP_CFM_REQ_EVT Please compare the numeric value: %d", param->cfm_req.num_val);
 		   
 			
-			esp_bt_gap_ssp_confirm_reply(param->cfm_req.bda, true);
+			//esp_bt_gap_ssp_confirm_reply(param->cfm_req.bda, true);
 			break;
 		case ESP_BT_GAP_KEY_NOTIF_EVT:
 			ESP_LOGI(BT_AV_TAG, "ESP_BT_GAP_KEY_NOTIF_EVT passkey:%d", param->key_notif.passkey);
@@ -788,10 +788,9 @@ void BluetoothA2DPSink::volume_set_by_controller(uint8_t volume)
     s_volume = volume;
     _lock_release(&s_volume_lock);
 	
-	
-	if (bt_volumechange!=nullptr){
-					(*bt_volumechange)(s_volume * 100/ 0x7f);
-		}	
+    if (bt_volumechange!=nullptr){
+	(*bt_volumechange)(s_volume * 100/ 0x7f);
+    }	
 }
 
 
@@ -845,13 +844,13 @@ void BluetoothA2DPSink::av_hdl_stack_evt(uint16_t event, void *p_param)
             }
 			
 			
-			/* initialize AVRCP target */
-			assert (esp_avrc_tg_init() == ESP_OK);
-			esp_avrc_tg_register_callback(app_rc_tg_callback_2);
+	   /* initialize AVRCP target */
+	    assert (esp_avrc_tg_init() == ESP_OK);
+	    esp_avrc_tg_register_callback(app_rc_tg_callback_2);
 
-			esp_avrc_rn_evt_cap_mask_t evt_set = {0};
-			esp_avrc_rn_evt_bit_mask_operation(ESP_AVRC_BIT_MASK_OP_SET, &evt_set, ESP_AVRC_RN_VOLUME_CHANGE);
-			assert(esp_avrc_tg_set_rn_evt_cap(&evt_set) == ESP_OK);
+	    esp_avrc_rn_evt_cap_mask_t evt_set = {0};
+	    esp_avrc_rn_evt_bit_mask_operation(ESP_AVRC_BIT_MASK_OP_SET, &evt_set, ESP_AVRC_RN_VOLUME_CHANGE);
+	    assert(esp_avrc_tg_set_rn_evt_cap(&evt_set) == ESP_OK);
 
 			
 		
