@@ -55,7 +55,7 @@ BluetoothA2DPSink::BluetoothA2DPSink() {
             .sample_rate = 44100,
             .bits_per_sample = (i2s_bits_per_sample_t)16,
             .channel_format = I2S_CHANNEL_FMT_RIGHT_LEFT,
-            .communication_format = (i2s_comm_format_t) (I2S_COMM_FORMAT_I2S | I2S_COMM_FORMAT_I2S_MSB),
+            .communication_format = (i2s_comm_format_t) (I2S_COMM_FORMAT_STAND_I2S),
             .intr_alloc_flags = 0, // default interrupt priority
             .dma_buf_count = 8,
             .dma_buf_len = 64,
@@ -788,9 +788,10 @@ void BluetoothA2DPSink::volume_set_by_controller(uint8_t volume)
     s_volume = volume;
     _lock_release(&s_volume_lock);
 	
-    if (bt_volumechange!=nullptr){
-	(*bt_volumechange)(s_volume * 100/ 0x7f);
-    }	
+	
+	if (bt_volumechange!=nullptr){
+					(*bt_volumechange)(s_volume * 100/ 0x7f);
+		}	
 }
 
 
@@ -844,13 +845,13 @@ void BluetoothA2DPSink::av_hdl_stack_evt(uint16_t event, void *p_param)
             }
 			
 			
-	   /* initialize AVRCP target */
-	    assert (esp_avrc_tg_init() == ESP_OK);
-	    esp_avrc_tg_register_callback(app_rc_tg_callback_2);
+			/* initialize AVRCP target */
+			assert (esp_avrc_tg_init() == ESP_OK);
+			esp_avrc_tg_register_callback(app_rc_tg_callback_2);
 
-	    esp_avrc_rn_evt_cap_mask_t evt_set = {0};
-	    esp_avrc_rn_evt_bit_mask_operation(ESP_AVRC_BIT_MASK_OP_SET, &evt_set, ESP_AVRC_RN_VOLUME_CHANGE);
-	    assert(esp_avrc_tg_set_rn_evt_cap(&evt_set) == ESP_OK);
+			esp_avrc_rn_evt_cap_mask_t evt_set = {0};
+			esp_avrc_rn_evt_bit_mask_operation(ESP_AVRC_BIT_MASK_OP_SET, &evt_set, ESP_AVRC_RN_VOLUME_CHANGE);
+			assert(esp_avrc_tg_set_rn_evt_cap(&evt_set) == ESP_OK);
 
 			
 		

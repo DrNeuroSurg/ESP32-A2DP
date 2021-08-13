@@ -1,6 +1,9 @@
 
 # Change History
-V1.03
+V1.0.4
+- add callback bt_volumechange;
+
+V1.0.3
 - fix volume control 
 
 
