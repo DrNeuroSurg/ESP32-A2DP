@@ -178,6 +178,10 @@ void BluetoothA2DPSink::set_on_disconnected2BT(void (*callBack)()){
   this->bt_disconnected = callBack;
 }
 
+void BluetoothA2DPSink::set_on_volumechange(void (*callBack)(int)){
+  this->bt_volumechange = callBack;
+}
+
 /** 
  * Main function to start the Bluetooth Processing
  */
@@ -231,18 +235,22 @@ void BluetoothA2DPSink::start(const char* name, bool auto_reconnect)
         }
     }
 	
-	/* Set default parameters for Secure Simple Pairing */
-    esp_bt_sp_param_t param_type = ESP_BT_SP_IOCAP_MODE;
-    esp_bt_io_cap_t iocap = ESP_BT_IO_CAP_IN;
-    esp_bt_gap_set_security_param(param_type, &iocap, sizeof(uint8_t));
 
-    /*
+	
+	/* Set default parameters for Secure Simple Pairing */
+	
+    //esp_bt_sp_param_t param_type = ESP_BT_SP_IOCAP_MODE;
+    //esp_bt_io_cap_t iocap = ESP_BT_IO_CAP_IN;
+    //esp_bt_gap_set_security_param(param_type, &iocap, sizeof(uint8_t));
+    
+	
+	/*
      * Set default parameters for Legacy Pairing
      * Use fixed pin code
      */
-    esp_bt_pin_type_t pin_type = ESP_BT_PIN_TYPE_VARIABLE;
-    esp_bt_pin_code_t pin_code;
-    esp_bt_gap_set_pin(pin_type, 0, pin_code);
+    //esp_bt_pin_type_t pin_type = ESP_BT_PIN_TYPE_VARIABLE;
+    //esp_bt_pin_code_t pin_code;
+    //esp_bt_gap_set_pin(pin_type, 0, pin_code);
 	
 }
 
@@ -303,7 +311,7 @@ void bt_app_gap_cb(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *param)
 			ESP_LOGI(BT_AV_TAG, "ESP_BT_GAP_CFM_REQ_EVT Please compare the numeric value: %d", param->cfm_req.num_val);
 		   
 			
-			//esp_bt_gap_ssp_confirm_reply(param->cfm_req.bda, true);
+			esp_bt_gap_ssp_confirm_reply(param->cfm_req.bda, true);
 			break;
 		case ESP_BT_GAP_KEY_NOTIF_EVT:
 			ESP_LOGI(BT_AV_TAG, "ESP_BT_GAP_KEY_NOTIF_EVT passkey:%d", param->key_notif.passkey);
@@ -779,6 +787,11 @@ void BluetoothA2DPSink::volume_set_by_controller(uint8_t volume)
     _lock_acquire(&s_volume_lock);
     s_volume = volume;
     _lock_release(&s_volume_lock);
+	
+	
+	if (bt_volumechange!=nullptr){
+					(*bt_volumechange)(s_volume * 100/ 0x7f);
+		}	
 }
 
 
@@ -950,6 +963,18 @@ void BluetoothA2DPSink::audio_data_callback(const uint8_t *data, uint32_t len) {
                 corr_data[i]= sample + 0x8000;
             }
         }
+		
+		
+		int16_t * pcmdata = (int16_t *)data;
+			for (int i=0; i<len/2; i++) {
+				int32_t temp = (int32_t)(*pcmdata);
+				temp = temp * s_volume;
+				temp = temp/512;
+				//*pcmdata = ((*pcmdata)*s_volume)/127;
+				*pcmdata = (int16_t)temp;
+				pcmdata++;
+			}
+		
 
         size_t i2s_bytes_written;
         if (i2s_config.bits_per_sample==I2S_BITS_PER_SAMPLE_16BIT){
@@ -1210,6 +1235,8 @@ void BluetoothA2DPSink::av_hdl_avrc_tg_evt(uint16_t event, void *p_param)
     }
     case ESP_AVRC_TG_SET_ABSOLUTE_VOLUME_CMD_EVT: {
         ESP_LOGI(BT_AV_TAG, "AVRC set absolute volume: %d%%", (int)rc->set_abs_vol.volume * 100/ 0x7f);
+		
+		
         volume_set_by_controller(rc->set_abs_vol.volume);
         break;
     }

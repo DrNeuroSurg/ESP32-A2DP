@@ -30,7 +30,7 @@ void setup() {
   Serial.begin(115200);
 
 
-  a2dp_sink.start("MyMusic", false);
+  a2dp_sink.start("MyMusic2", false);
 
 
 

@@ -1,5 +1,8 @@
 
 # Change History
+V1.03
+- fix volume control 
+
 
 V1.0.2
 - add volume control 

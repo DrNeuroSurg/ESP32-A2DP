@@ -49,7 +49,7 @@ extern "C" {
 #define APP_SIG_WORK_DISPATCH (0x01)
 
 #ifndef AUTOCONNECT_TRY_NUM
-#define AUTOCONNECT_TRY_NUM 5
+#define AUTOCONNECT_TRY_NUM 1
 #endif
 
 
@@ -140,11 +140,16 @@ class BluetoothA2DPSink {
     /// Define callback which is called when we receive data
     virtual void set_on_data_received(void (*callBack)());
 	
-	/// Define callback which is called when we receive data
+	/// Set the callback that is called when the BT device is connected
     virtual void set_on_connected2BT(void (*callBack)());
 	
-	/// Define callback which is called when we receive data
+	/// Set the callback that is called when the BT device is disconnected
     virtual void set_on_disconnected2BT(void (*callBack)());
+
+	/// Set the callback that is called when they change the volume
+    virtual void set_on_volumechange(void (*callBack)(int));
+
+
 
     /// Starts to play music using AVRC
     virtual void play();
@@ -200,6 +205,7 @@ class BluetoothA2DPSink {
     esp_a2d_connection_state_t connection_state;
     esp_a2d_mct_t audio_type;
 	
+	void (*bt_volumechange)(int) = nullptr;
 	void (*bt_disconnected)() = nullptr;
 	void (*bt_connected)() = nullptr;
     void (*data_received)() = nullptr;
